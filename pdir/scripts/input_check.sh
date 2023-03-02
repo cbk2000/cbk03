@@ -16,14 +16,15 @@ echo "Creating user directory for $username"
 # Check if the user directory already exists
 if [ -d "input/dataUser/${username}" ]; then
     echo "User directory already exists."
-    exit 1
+else
+    echo "Creating user directory."
+    # Create the user directory and 11 DW directories
+    mkdir -p "input/dataUser/${username}"
+    for i in $(seq -f "%02g" 0 11); do
+        mkdir -p "input/dataUser/${username}/DW${i}"
+    done
 fi
 
-# Create the user directory and 11 DW directories
-mkdir -p "input/dataUser/${username}"
-for i in $(seq -f "%02g" 0 11); do
-    mkdir -p "input/dataUser/${username}/DW${i}"
-done
 
 
 # Create example files under each DW directory
@@ -53,3 +54,6 @@ for user_data in "${!TEMPLATE_USER_DATA[@]}"; do
     data="${TEMPLATE_USER_DATA[$user_data]}"
     echo "$data" > "input/dataUser/${username}/${user_data}"
 done
+
+
+exit 0
