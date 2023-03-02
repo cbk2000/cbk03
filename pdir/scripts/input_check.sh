@@ -1,55 +1,45 @@
 #!/bin/bash
 
-# Main function
-function main(){
-    # Variables
-    input_dir=$1
-    current_week=$2
+## Fix this, ini temp solution aja
+cd ..
 
-    echo "input_check.sh: Checking the week directory..."
-    check_week
+# Check if username is provided as an argument
+if [[ $# -eq 0 ]]; then
+  echo "Error: No username provided."
+  exit 1
+fi
 
-    echo "input_check.sh: Input Validation Completed"
-}
+# Set username as the first argument
+username=$1
+echo "Creating user directory for $username"
 
-# Handle checking for week directory
-function check_week(){
-    if ls "$input_dir" | grep "$current_week" >/dev/null; then
-        echo "input_check.sh: Directory $current_week Found..."
-        echo "input_check.sh: Checking $current_week Directory Content..."
-        check_content
-    else
-        echo "input_check.sh: $current_week Directory was not found, Creating default template..."
-        create_missing
-    fi
-}
+# Check if the user directory already exists
+if [ -d "input/dataUser/${username}" ]; then
+  echo "User directory already exists."
+  exit 1
+fi
 
-function check_content(){
-    echo "input_check.sh: Check for absen Directory..."
-    if ls "$input_dir/$current_week" | grep "absen" >/dev/null; then
-        echo "input_check.sh: absen Directory Found"
-    else
-        echo "input_check.sh: absen Directory Missing, Creating..."
-        mkdir -p "$input_dir/$current_week/absen"
-    fi
+# Create the user directory and 11 DW directories
+mkdir -p "input/dataUser/${username}"
+for i in $(seq -f "%02g" 0 11); do
+  mkdir -p "input/dataUser/${username}/DW${i}"
+done
 
-    echo "input_check.sh: Check for quiz Directory..."
-    if ls "$input_dir/$current_week" | grep "quiz" >/dev/null; then
-        echo "input_check.sh: quiz Directory Found"
-    else
-        echo "input_check.sh: quiz Directory Missing, Creating..."
-        mkdir -p "$input_dir/$current_week/quiz"
-    fi
-}
 
-function create_missing(){
-    echo "input_check.sh: Creating Week Directory..."
-    mkdir -p "$input_dir/$current_week"
-    echo "input_check.sh: Creating Absen Directory..."
-    mkdir -p "$input_dir/$current_week/absen"
-    echo "input_check.sh: Creating Quiz Directory..."
-    mkdir -p "$input_dir/$current_week/quiz"
-    echo "input_check.sh: Creation Process Completed..."
-}
+# # Create example files under each DW directory
+# for i in $(seq -f "%02g" 0 11); do
+#   echo "Example file in DW${i}" > "pdir/input/dataUser/${username}/DW${i}/example.txt"
+# done
 
-main "$1" "$2"
+# Create example files in the user directory
+# echo "Example file in user directory" > "pdir/input/dataUser/${username}/example.txt"
+
+user_data_template=$(source scripts/user_data_array.sh; generate_template_user_data_array "" "" "${username}")
+
+eval $user_data_template
+
+
+for user_data in "${!TEMPLATE_USER_DATA[@]}"; do
+  data="${TEMPLATE_USER_DATA[$user_data]}"
+  echo "$data" > "input/dataUser/${username}/${user_data}"
+done
