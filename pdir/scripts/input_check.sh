@@ -1,7 +1,5 @@
 #!/bin/bash
 
-## Fix this, ini temp solution aja
-cd ..
 
 # Check if username is provided as an argument
 if [[ $# -eq 0 ]]; then
@@ -9,8 +7,11 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
+basedir=$1
+cd $basedir
+
 # Set username as the first argument
-username=$1
+username=$2
 echo "Creating user directory for $username"
 
 # Check if the user directory already exists
