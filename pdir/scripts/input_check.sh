@@ -3,7 +3,7 @@
 
 # Check if username is provided as an argument
 if [[ $# -eq 0 ]]; then
-    echo "Error: No username provided."
+    echo "Error: No arguments provided."
     exit 1
 fi
 
@@ -14,6 +14,10 @@ cd $basedir
 username=$2
 echo "Creating user directory for $username"
 
+week=$3
+echo "Generating directories for $week"
+
+
 # Check if the user directory already exists
 if [ -d "input/dataUser/${username}" ]; then
     echo "User directory already exists."
@@ -21,9 +25,7 @@ else
     echo "Creating user directory."
     # Create the user directory and 11 DW directories
     mkdir -p "input/dataUser/${username}"
-    for i in $(seq -f "%02g" 0 11); do
-        mkdir -p "input/dataUser/${username}/DW${i}"
-    done
+    mkdir -p "input/dataUser/${username}/DW${week}"
 fi
 
 
@@ -35,11 +37,9 @@ echo "Writing weekly data templates"
 weekly_data_template=$(source scripts/weekly_data_array.sh; generate_template_weekly_data_array)
 eval $weekly_data_template
 
-for i in $(seq -f "%02g" 0 11); do
-    for user_data in "${!TEMPLATE_WEEKLY_DATA[@]}"; do
-        data="${TEMPLATE_WEEKLY_DATA[$user_data]}"
-        echo "$data" > "input/dataUser/${username}/DW${i}/${user_data}"
-    done
+for user_data in "${!TEMPLATE_WEEKLY_DATA[@]}"; do
+    data="${TEMPLATE_WEEKLY_DATA[$user_data]}"
+    echo "$data" > "input/dataUser/${username}/DW${week}/${user_data}"
 done
 
 # Create example files in the user directory
@@ -50,11 +50,9 @@ user_data_template=$(source scripts/user_data_array.sh; generate_template_user_d
 
 eval $user_data_template
 
-
-for user_data in "${!TEMPLATE_USER_DATA[@]}"; do
-    data="${TEMPLATE_USER_DATA[$user_data]}"
+if [ ! -f "input/dataUser/${username}/${user_data}" ]; then
     echo "$data" > "input/dataUser/${username}/${user_data}"
-done
+fi
 
 
 exit 0
