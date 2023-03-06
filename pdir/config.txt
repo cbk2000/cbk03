@@ -1,3 +1,4 @@
 INPUT=input
 OUTPUT=output
-CURRENT_WEEK=w03
+CURRENT_WEEK=*
+NPM_USER=mapNPM.txt

@@ -1,58 +1,57 @@
 #!/bin/bash
 
+function main(){
+    # Check if username is provided as an argument
+    if [[ $# -eq 0 ]]; then
+        echo "Error: No arguments provided."
+        exit 1
+    fi
 
-# Check if username is provided as an argument
-if [[ $# -eq 0 ]]; then
-    echo "Error: No arguments provided."
-    exit 1
-fi
+    basedir=$1
+    cd $basedir
 
-basedir=$1
-cd $basedir
+    # Set username as the first argument
+    username=$2
+    echo "Creating user directory for $username"
 
-# Set username as the first argument
-username=$2
-echo "Creating user directory for $username"
+    week=$3
+    echo "Generating directories for $week"
 
-week=$3
-echo "Generating directories for $week"
+    # Check if the user directory already exists
+    if [ -d "input/dataUser/${username}" ]; then
+        echo "User directory already exists."
+    else
+        echo "Creating user directory."
+        # Create the user directory and 11 DW directories
+        mkdir -p "input/dataUser/${username}"
+        mkdir -p "input/dataUser/${username}/DW${week}"
+    fi
 
+    # Create example files under each DW directory
 
-# Check if the user directory already exists
-if [ -d "input/dataUser/${username}" ]; then
-    echo "User directory already exists."
-else
-    echo "Creating user directory."
-    # Create the user directory and 11 DW directories
-    mkdir -p "input/dataUser/${username}"
-    mkdir -p "input/dataUser/${username}/DW${week}"
-fi
+    echo "Writing weekly data templates"
 
+    weekly_data_template=$(source scripts/weekly_data_array.sh; generate_template_weekly_data_array)
+    eval $weekly_data_template
 
+    for user_data in "${!TEMPLATE_WEEKLY_DATA[@]}"; do
+        data="${TEMPLATE_WEEKLY_DATA[$user_data]}"
+        echo "$data" > "input/dataUser/${username}/DW${week}/${user_data}"
+    done
 
-# Create example files under each DW directory
+    # Create example files in the user directory
+    # echo "Example file in user directory" > "pdir/input/dataUser/${username}/example.txt"
 
-echo "Writing weekly data templates"
+    echo "Writing user data templates"
+    user_data_template=$(source scripts/user_data_array.sh; generate_template_user_data_array "" "" "${username}")
 
-weekly_data_template=$(source scripts/weekly_data_array.sh; generate_template_weekly_data_array)
-eval $weekly_data_template
+    eval $user_data_template
 
-for user_data in "${!TEMPLATE_WEEKLY_DATA[@]}"; do
-    data="${TEMPLATE_WEEKLY_DATA[$user_data]}"
-    echo "$data" > "input/dataUser/${username}/DW${week}/${user_data}"
-done
+    if [ ! -f "input/dataUser/${username}/${user_data}" ]; then
+        echo "$data" > "input/dataUser/${username}/${user_data}"
+    fi
 
-# Create example files in the user directory
-# echo "Example file in user directory" > "pdir/input/dataUser/${username}/example.txt"
+    exit 0
+}
 
-echo "Writing user data templates"
-user_data_template=$(source scripts/user_data_array.sh; generate_template_user_data_array "" "" "${username}")
-
-eval $user_data_template
-
-if [ ! -f "input/dataUser/${username}/${user_data}" ]; then
-    echo "$data" > "input/dataUser/${username}/${user_data}"
-fi
-
-
-exit 0
+main "$1" "$2" "$3"
