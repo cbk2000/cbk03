@@ -1,55 +1,58 @@
 #!/bin/bash
 
-# Main function
-function main(){
-    # Variables
-    input_dir=$1
-    current_week=$2
 
-    echo "input_check.sh: Checking the week directory..."
-    check_week
+# Check if username is provided as an argument
+if [[ $# -eq 0 ]]; then
+    echo "Error: No arguments provided."
+    exit 1
+fi
 
-    echo "input_check.sh: Input Validation Completed"
-}
+basedir=$1
+cd $basedir
 
-# Handle checking for week directory
-function check_week(){
-    if ls "$input_dir" | grep "$current_week" >/dev/null; then
-        echo "input_check.sh: Directory $current_week Found..."
-        echo "input_check.sh: Checking $current_week Directory Content..."
-        check_content
-    else
-        echo "input_check.sh: $current_week Directory was not found, Creating default template..."
-        create_missing
-    fi
-}
+# Set username as the first argument
+username=$2
+echo "Creating user directory for $username"
 
-function check_content(){
-    echo "input_check.sh: Check for absen Directory..."
-    if ls "$input_dir/$current_week" | grep "absen" >/dev/null; then
-        echo "input_check.sh: absen Directory Found"
-    else
-        echo "input_check.sh: absen Directory Missing, Creating..."
-        mkdir -p "$input_dir/$current_week/absen"
-    fi
+week=$3
+echo "Generating directories for $week"
 
-    echo "input_check.sh: Check for quiz Directory..."
-    if ls "$input_dir/$current_week" | grep "quiz" >/dev/null; then
-        echo "input_check.sh: quiz Directory Found"
-    else
-        echo "input_check.sh: quiz Directory Missing, Creating..."
-        mkdir -p "$input_dir/$current_week/quiz"
-    fi
-}
 
-function create_missing(){
-    echo "input_check.sh: Creating Week Directory..."
-    mkdir -p "$input_dir/$current_week"
-    echo "input_check.sh: Creating Absen Directory..."
-    mkdir -p "$input_dir/$current_week/absen"
-    echo "input_check.sh: Creating Quiz Directory..."
-    mkdir -p "$input_dir/$current_week/quiz"
-    echo "input_check.sh: Creation Process Completed..."
-}
+# Check if the user directory already exists
+if [ -d "input/dataUser/${username}" ]; then
+    echo "User directory already exists."
+else
+    echo "Creating user directory."
+    # Create the user directory and 11 DW directories
+    mkdir -p "input/dataUser/${username}"
+    mkdir -p "input/dataUser/${username}/DW${week}"
+fi
 
-main "$1" "$2"
+
+
+# Create example files under each DW directory
+
+echo "Writing weekly data templates"
+
+weekly_data_template=$(source scripts/weekly_data_array.sh; generate_template_weekly_data_array)
+eval $weekly_data_template
+
+for user_data in "${!TEMPLATE_WEEKLY_DATA[@]}"; do
+    data="${TEMPLATE_WEEKLY_DATA[$user_data]}"
+    echo "$data" > "input/dataUser/${username}/DW${week}/${user_data}"
+done
+
+# Create example files in the user directory
+# echo "Example file in user directory" > "pdir/input/dataUser/${username}/example.txt"
+
+echo "Writing user data templates"
+user_data_template=$(source scripts/user_data_array.sh; generate_template_user_data_array "" "" "${username}")
+
+eval $user_data_template
+
+if [ ! -f "input/dataUser/${username}/${user_data}" ]; then
+    echo "$data" > "input/dataUser/${username}/${user_data}"
+fi
+
+
+exit 0
