@@ -9,6 +9,7 @@ function main(){
     output=""
     week=""
     npm_user=""
+    info_SIAK=""
 
     # Call the get_values function
     get_values
@@ -36,11 +37,12 @@ function main(){
 
     else
         echo "script.sh: Running Input Check"
-        bash "$working_dir/scripts/input_check.sh" "$working_dir/$input" "$week"
+        bash "$working_dir/scripts/input_check.sh" "$working_dir" "$username" "$week"
     fi
 
-    # echo "script.sh: Running Output Check"
-    # bash "$working_dir/scripts/output_check.sh" "$working_dir/$output" "$week"
+    # Check if SCORET has been previously generated or not
+    echo "script.sh: Running SCORET Check"
+    bash "$working_dir/scripts/init_scoret.sh" "$working_dir/$output" "$working_dir/$input/$info_SIAK" "$working_dir/$input/$npm_user"
 
     # echo "script.sh: Processing absen directory"
     # bash "$working_dir/scripts/absen_process.sh" "$working_dir/$input" "$week" "$working_dir/$output"
@@ -93,6 +95,15 @@ function get_values(){
             echo "script.sh: Filename: $npm_user"
         fi
 
+        if [[ $line == *"INFO_SIAK="* ]]; then
+            echo "script.sh: NPM for SIAK Filename..."
+            # Take the value
+            info_SIAK=${line#*=}
+            # Clean the value from \r, \n, and extra space
+            info_SIAK=$(echo $info_SIAK | sed 's/[[:space:]\r\n]//g')
+            echo "script.sh: Filename: $info_SIAK"
+        fi
+
     done < "$config"
 
     # Checking if any configuration was not set
@@ -108,6 +119,16 @@ function get_values(){
 
     if [[ -z $week ]]; then
         echo "script.sh: The current week is not set"
+        exit 1
+    fi
+
+    if [[ -z $npm_user ]]; then
+        echo "script.sh: The NPM to User Mapping file is not set"
+        exit 1
+    fi
+
+    if [[ -z $info_SIAK ]]; then
+        echo "script.sh: The NPM from SIAK file is not set"
         exit 1
     fi
 
