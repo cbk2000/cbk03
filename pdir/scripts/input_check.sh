@@ -2,13 +2,14 @@
 
 function main(){
     # Check if username is provided as an argument
-    if [[ $# -eq 0 ]]; then
-        echo "Error: No arguments provided."
+    if [[ $# -lt 3 ]]; then
+        echo "Error: Insufficient arguments provided."
+        echo "Usage: $0 BASEDIR USERNAME WEEK"
         exit 1
     fi
 
+
     basedir=$1
-    cd $basedir
 
     # Set username as the first argument
     username=$2
@@ -18,13 +19,14 @@ function main(){
     echo "Generating directories for $week"
 
     # Check if the user directory already exists
-    if [ -d "input/dataUser/${username}" ]; then
-        echo "User directory already exists."
+    if [ -d "${basedir}/input/dataUser/${username}" ]; then
+        echo "User directory already exists. Exiting..."
+        exit 1
     else
         echo "Creating user directory."
         # Create the user directory and 11 DW directories
-        mkdir -p "input/dataUser/${username}"
-        mkdir -p "input/dataUser/${username}/DW${week}"
+        mkdir -p "${basedir}/input/dataUser/${username}"
+        mkdir -p "${basedir}/input/dataUser/${username}/DW${week}"
     fi
 
     # Create example files under each DW directory
@@ -36,7 +38,7 @@ function main(){
 
     for user_data in "${!TEMPLATE_WEEKLY_DATA[@]}"; do
         data="${TEMPLATE_WEEKLY_DATA[$user_data]}"
-        echo "$data" > "input/dataUser/${username}/DW${week}/${user_data}"
+        echo "$data" > "${basedir}/input/dataUser/${username}/DW${week}/${user_data}"
     done
 
     # Create example files in the user directory
@@ -47,8 +49,8 @@ function main(){
 
     eval $user_data_template
 
-    if [ ! -f "input/dataUser/${username}/${user_data}" ]; then
-        echo "$data" > "input/dataUser/${username}/${user_data}"
+    if [ ! -f "${basedir}/input/dataUser/${username}/${user_data}" ]; then
+        echo "$data" > "${basedir}/input/dataUser/${username}/${user_data}"
     fi
 
     exit 0
