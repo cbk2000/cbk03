@@ -1,5 +1,0 @@
-INPUT=input
-OUTPUT=output
-CURRENT_WEEK=*
-NPM_USER=mapNPM.txt
-INFO_SIAK=infoSIAK.txt
